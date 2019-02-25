@@ -1,5 +1,6 @@
 <template>
     <div>
+        <h3>{{ name }}</h3>
         <ul id="chat">
             <li v-for="(item, index) in data" :key="index" :class="{'right': item.people_id == people_id}">
                 <span>{{item.name}}</span>
@@ -84,6 +85,9 @@ export default {
         socket.on('return message', function (msg) {
             console.log(msg)
             vm.data.push(msg)
+            setTimeout(function(){
+                vm.boxScroll(document.getElementById("chat"));
+            }, 1)
         });
     },
 }
@@ -93,9 +97,12 @@ export default {
         width: 100%;
         height: 100%;
     }
+    h3{
+        line-height: 60px;
+    }
     ul{
         width: 100%;
-        height: calc(100% - 160px);
+        height: calc(100% - 120px);
         overflow: auto;
     }
     /*滚动条样式*/
@@ -133,7 +140,6 @@ export default {
         width: 100%;
         height: 60px;
         text-align: right;
-        margin-top: 30px;
     }
     a{
         width: 100px;
