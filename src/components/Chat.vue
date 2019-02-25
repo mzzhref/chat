@@ -1,28 +1,13 @@
 <template>
     <div>
         <ul>
-            <li>
-                <span>miao1</span>
-                <p>妻子突然问丈夫：“你爱我吗？” “爱，当然爱！”丈夫毫不犹豫地回答。 妻子想了想又问：“你是不是怕伤害我才说的？” 丈夫连忙说：“不，不，我是怕你伤害我才说的</p>
-            </li>
-            <li>
-                <span>miao2</span>
-                <p>妻子突然问丈夫：“你爱我吗？” “爱，当然爱！”丈夫毫不犹豫地回答。 妻子想了想又问：“你是不是怕伤害我才说的？” 丈夫连忙说：“不，不，我是怕你伤害我才说的妻子突然问丈夫：“你爱我吗？” “爱，当然爱！”丈夫毫不犹豫地回答。 妻子想了想又问：“你是不是怕伤害我才说的？” 丈夫连忙说：“不，不，我是怕你伤害我才说的</p>
-            </li>
-            <li class="right">
-                <span>miao</span>
-                <p>妻子突然问丈夫：“你爱我吗？” “爱，当然爱！”丈夫毫不犹豫地回答。 妻子想了想又问：“你是不是怕伤害我才说的？” 丈夫连忙说：“不，不，我是怕你伤害我才说的</p>
-            </li>
-            <li>
-                <span>miao3</span>
-                <p>妻子突然问丈夫：“你爱我吗？” “爱，当然爱！”丈夫毫不犹豫地回答。 妻子想了想又问：“你是不是怕伤害我才说的？” 丈夫连忙说：“不，不，我是怕你伤害我才说的</p>
-            </li>
-            <li>
-                <span>miao4</span>
-                <p>妻子突然问丈夫：“你爱我吗？” “爱，当然爱！”丈夫毫不犹豫地回答。 妻子想了想又问：“你是不是怕伤害我才说的？” 丈夫连忙说：“不，不，我是怕你伤害我才说的</p>
+            <li v-for="(item, index) in data" :key="index" :class="{'right': item.people_id == people_id}">
+                <span>{{item.name}}</span>
+                <p>{{item.content}}</p>
             </li>
         </ul>
         <div class="send">
+            <input type="text" placeholder="来聊天哦" v-model="content">
             <a href="javascript:;" @click="send">send</a>
         </div>
     </div>
@@ -34,25 +19,62 @@ var vm = null;
 export default {
     data() {
         return {
+            people_id: null,
             name: null,
+            content: null,
+            data: null,
         }
     },
     created() {
         vm = this;
+        vm.init();
+        vm.people_id = vm.$route.query.id;
         vm.name = vm.$route.query.name;
     },
     methods: {
+        init(){
+            this.$axios.get(vm.$api.config.api.chat).then(function (res) {
+                console.log(res.data);
+                if(res.data.status){
+                    vm.data = res.data.result;
+                }else{
+                    alert(res.data.info)
+                }
+            }).catch(function (err) {
+                console.log(err);
+            });
+        },
         send(){
-            socket.emit('chat message', {
+            this.$axios.post(vm.$api.config.api.chat_insert, vm.$qs.stringify({
+                people_id: vm.people_id,
                 name: vm.name,
-                txt: vm.txt
+                content: vm.content,
+                chat_time: vm.$utils.timeStamp()
+            })).then(function (res) {
+                console.log(res.data);
+                if(res.data.status){
+                    socket.emit('chat message', {
+                        people_id: vm.people_id,
+                        name: vm.name,
+                        content: vm.content
+                    });
+                    vm.data.push({
+                        people_id: vm.people_id,
+                        name: vm.name,
+                        content: vm.content
+                    })
+                }else{
+                    alert(res.data.info)
+                }
+            }).catch(function (err) {
+                console.log(err);
             });
         }
     },
     mounted() {
         socket.on('return message', function (msg) {
-            console.log('message: ' + JSON.stringify(msg));
-            vm.msg = msg.name +':'+ msg.txt;
+            console.log(msg)
+            vm.data.push(msg)
         });
     },
 }
@@ -112,6 +134,17 @@ export default {
         line-height: 60px;
         text-align: center;
         background: #ccc;
+    }
+    input{
+        display: inline-block;
+        height: 60px;
+        width: calc(100% - 100px);
+        box-sizing: border-box;
+        float: left;
+        outline: none;
+        font-size: 30px;
+        resize: none;
+        padding: 0 10px;
     }
 </style>
 

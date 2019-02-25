@@ -29,7 +29,7 @@ app.use(bodyParser.urlencoded({
     extended: false
 }));
 
-app.use(express.static('../index.html'));
+app.use(express.static('../dist'));
 
 // 聊天内容
 app.get('/api/chat', function(req, res) {
@@ -54,14 +54,42 @@ app.get('/api/chat', function(req, res) {
 
 // 写入聊天内容
 app.post('/api/chat_insert', function(req, res) {
-    let name = req.query.name;
-    let people_id = req.query.people_id;
-    let content = req.query.content;
-    let chat_time = req.query.chat_time;
+    let name = req.body.name;
+    let people_id = req.body.people_id;
+    let content = req.body.content;
+    let chat_time = req.body.chat_time;
     let obj = {
         info: null,
         status: true,
         result: null
+    }
+    if (!!!name) {
+        obj.info = '缺失参数name';
+        obj.status = false;
+        res.send(obj);
+        res.end();
+        return false
+    }
+    if (!!!people_id) {
+        obj.info = '缺失参数people_id';
+        obj.status = false;
+        res.send(obj);
+        res.end();
+        return false
+    }
+    if (!!!content) {
+        obj.info = '缺失参数content';
+        obj.status = false;
+        res.send(obj);
+        res.end();
+        return false
+    }
+    if (!!!chat_time) {
+        obj.info = '缺失参数chat_time';
+        obj.status = false;
+        res.send(obj);
+        res.end();
+        return false
     }
     let addSqlParams = [name, people_id, content, chat_time]
     connection.query(`INSERT INTO chat_content (name, people_id, content, chat_time) VALUES (?, ?, ?, ?)`, addSqlParams, function(error, results, fields) {
@@ -210,9 +238,7 @@ io.on('connection', function (socket) {
   })
 
   socket.on('chat message', function (msg) {
-    console.log('message: ' + msg);
     socket.broadcast.emit('return message', msg);
-    // socket.emit('return message', msg);
   });
 });
 
