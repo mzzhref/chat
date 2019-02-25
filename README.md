@@ -1,6 +1,7 @@
 # sockit_chat
 
 > A Vue.js project
+
 > nodejs+mysql+vue
 
 ## Build Setup
