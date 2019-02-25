@@ -8,14 +8,14 @@ let connection = mysql.createConnection({
     host: '127.0.0.1',
     user: 'root',
     password: 'root',
-    database: 'kmm'
+    database: 'chat'
 });
 //allow custom header and CORS
 app.all('*', function(req, res, next) {
     res.header('Access-Control-Allow-Origin', '*');
     res.header('Access-Control-Allow-Headers', 'Content-Type, Content-Length, Authorization, Accept, X-Requested-With , yourHeaderFeild');
     res.header('Access-Control-Allow-Methods', 'PUT, POST, GET, DELETE, OPTIONS');
-
+    console.log(req.method)
     if (req.method == 'OPTIONS') {
         res.send(200);
     } else {
@@ -31,32 +31,46 @@ app.use(bodyParser.urlencoded({
 
 app.use(express.static('../index.html'));
 
-// 搜索列表
-app.get('/api/search', function(req, res) {
-    let name = req.query.name;
-    let age = req.query.age;
-    let sqlSearch = "";
+// 聊天内容
+app.get('/api/chat', function(req, res) {
     let obj = {
         info: null,
         status: true,
         result: null
     }
-    if (!!!name && !!!age) {
-        sqlSearch = 'SELECT * FROM kmm_content';
-    } else if (!!!name) {
-        sqlSearch = `SELECT * FROM kmm_content WHERE age = '${age}'`
-    } else if (!!!age) {
-        sqlSearch = `SELECT * FROM kmm_content WHERE name LIKE '%${name}%'`;
-    } else {
-        sqlSearch = `SELECT * FROM kmm_content WHERE name LIKE '%${name}%' AND age = '${age}'`
-    }
-    connection.query(sqlSearch, function(error, results, fields) {
+    connection.query('SELECT * FROM chat_content', function(error, results, fields) {
         if (error) {
             obj.info = error.message;
             obj.status = false;
             return false;
         }
-        obj.info = 'search success';
+        obj.info = 'chat success';
+        obj.status = true;
+        obj.result = results;
+        res.send(obj);
+        res.end();
+    });
+});
+
+// 写入聊天内容
+app.post('/api/chat_insert', function(req, res) {
+    let name = req.query.name;
+    let people_id = req.query.people_id;
+    let content = req.query.content;
+    let chat_time = req.query.chat_time;
+    let obj = {
+        info: null,
+        status: true,
+        result: null
+    }
+    let addSqlParams = [name, people_id, content, chat_time]
+    connection.query(`INSERT INTO chat_content (name, people_id, content, chat_time) VALUES (?, ?, ?, ?)`, addSqlParams, function(error, results, fields) {
+        if (error) {
+            obj.info = error.message;
+            obj.status = false;
+            return false;
+        }
+        obj.info = 'chat_insert success';
         obj.status = true;
         obj.result = results;
         res.send(obj);
@@ -68,6 +82,7 @@ app.get('/api/search', function(req, res) {
 app.post('/api/sign', function(req, res) {
     let name = req.body.name;
     let psd = req.body.psd;
+    let sign_time = req.body.sign_time;
     let obj = {
         info: null,
         status: true,
@@ -87,18 +102,33 @@ app.post('/api/sign', function(req, res) {
         res.end();
         return false
     }
-    let addSqlParams = [name, psd];
-    connection.query(`INSERT INTO chat_people (name, psd) VALUES (?, ?)`, addSqlParams, function(error, results, fields) {
+    let addSqlParams = [name, psd, sign_time];
+    connection.query(`SELECT * FROM chat_people WHERE NAME='${name}'`, function(error, results, fields) {
         if (error) {
             obj.info = error.message;
             obj.status = false;
             return false;
         }
-        obj.info = 'sign success';
-        obj.status = true;
-        obj.result = results;
-        res.send(obj);
-        res.end();
+        if(results.length == 0){
+            connection.query(`INSERT INTO chat_people (name, psd, sign_time) VALUES (?, ?, ?)`, addSqlParams, function(error, results, fields) {
+                if (error) {
+                    obj.info = error.message;
+                    obj.status = false;
+                    return false;
+                }
+                obj.info = 'sign success';
+                obj.status = true;
+                obj.result = results;
+                res.send(obj);
+                res.end();
+            });
+        }else{
+            obj.info = '用户已注册';
+            obj.status = false;
+            obj.result = results;
+            res.send(obj);
+            res.end();
+        }
     });
 });
 
@@ -106,6 +136,7 @@ app.post('/api/sign', function(req, res) {
 app.post('/api/login', function(req, res) {
     let name = req.body.name;
     let psd = req.body.psd;
+    let login_time = req.body.login_time;
     let obj = {
         info: null,
         status: true,
@@ -125,26 +156,53 @@ app.post('/api/login', function(req, res) {
         res.end();
         return false
     }
-    let addSqlParams = [name, psd];
-    connection.query(`INSERT INTO chat_people (name, psd) VALUES (?, ?)`, addSqlParams, function(error, results, fields) {
+    connection.query(`SELECT * FROM chat_people WHERE NAME='${name}'`, function(error, results, fields) {
         if (error) {
             obj.info = error.message;
             obj.status = false;
             return false;
         }
-        obj.info = 'login success';
-        obj.status = true;
-        obj.result = results;
-        res.send(obj);
-        res.end();
+        if(results.length == 0){
+            obj.info = '未检测到此用户';
+            obj.status = false;
+            obj.result = results;
+            res.send(obj);
+            res.end();
+        }else{
+            connection.query(`SELECT * FROM chat_people WHERE NAME='${name}' AND PSD='${psd}'`, function(error, results, fields) {
+                if (error) {
+                    obj.info = error.message;
+                    obj.status = false;
+                    return false;
+                }
+                if(results.length == 0){
+                    obj.info = '密码错误';
+                    obj.status = false;
+                    obj.result = results;
+                    res.send(obj);
+                    res.end();
+                }else{
+                    obj.result = results;
+                    let addSqlParams = [login_time, name];
+                    connection.query(`UPDATE chat_people SET login_time = ? WHERE NAME = ?`, addSqlParams, function(error, results, fields) {
+                        if (error) {
+                            obj.info = error.message;
+                            obj.status = false;
+                            return false;
+                        }
+                        obj.info = 'login success';
+                        obj.status = true;
+                        res.send(obj);
+                        res.end();
+                    });
+                }
+            });
+        }
     });
 });
 
 let count = 0;
 io.on('connection', function (socket) {
-  count++;
-  console.log(count + ' user connected');
-  console.log(socket.id);
   //断开事件
   socket.on('disconnect', function (data) {
     console.log('断开', data)

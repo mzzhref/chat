@@ -7,9 +7,12 @@ import router from './router'
 import axios from 'axios'
 import qs from 'qs'
 import api from './api/api'
+import utils from './utils/index.js'
+// 实例挂载
 Vue.prototype.$axios = axios
 Vue.prototype.$qs = qs
 Vue.prototype.$api = api
+Vue.prototype.$utils = utils
 
 Vue.config.productionTip = false
 
