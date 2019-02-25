@@ -1,6 +1,6 @@
 <template>
     <div>
-        <ul>
+        <ul id="chat">
             <li v-for="(item, index) in data" :key="index" :class="{'right': item.people_id == people_id}">
                 <span>{{item.name}}</span>
                 <p>{{item.content}}</p>
@@ -32,11 +32,17 @@ export default {
         vm.name = vm.$route.query.name;
     },
     methods: {
+        boxScroll(tag){
+            tag.scrollTop = tag.scrollHeight;
+        },
         init(){
             this.$axios.get(vm.$api.config.api.chat).then(function (res) {
                 console.log(res.data);
                 if(res.data.status){
                     vm.data = res.data.result;
+                    setTimeout(function(){
+                        vm.boxScroll(document.getElementById("chat"));
+                    }, 1)
                 }else{
                     alert(res.data.info)
                 }
@@ -63,6 +69,9 @@ export default {
                         name: vm.name,
                         content: vm.content
                     })
+                    setTimeout(function(){
+                        vm.boxScroll(document.getElementById("chat"));
+                    }, 1)
                 }else{
                     alert(res.data.info)
                 }
