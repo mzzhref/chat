@@ -4,6 +4,13 @@ import Vue from 'vue'
 import App from './App'
 import router from './router'
 
+import axios from 'axios'
+import qs from 'qs'
+import api from './api/api'
+Vue.prototype.$axios = axios
+Vue.prototype.$qs = qs
+Vue.prototype.$api = api
+
 Vue.config.productionTip = false
 
 /* eslint-disable no-new */

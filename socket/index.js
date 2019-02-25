@@ -16,13 +16,18 @@ app.all('*', function(req, res, next) {
     res.header('Access-Control-Allow-Headers', 'Content-Type, Content-Length, Authorization, Accept, X-Requested-With , yourHeaderFeild');
     res.header('Access-Control-Allow-Methods', 'PUT, POST, GET, DELETE, OPTIONS');
 
-    console.log(req.method)
     if (req.method == 'OPTIONS') {
         res.send(200);
     } else {
         next();
     }
 });
+
+let bodyParser = require("body-parser");
+// 加上这一行才可以获取post方式传来的参数
+app.use(bodyParser.urlencoded({
+    extended: false
+}));
 
 app.use(express.static('../index.html'));
 
@@ -52,6 +57,82 @@ app.get('/api/search', function(req, res) {
             return false;
         }
         obj.info = 'search success';
+        obj.status = true;
+        obj.result = results;
+        res.send(obj);
+        res.end();
+    });
+});
+
+// 注册
+app.post('/api/sign', function(req, res) {
+    let name = req.body.name;
+    let psd = req.body.psd;
+    let obj = {
+        info: null,
+        status: true,
+        result: null
+    }
+    if (!!!name) {
+        obj.info = '缺失参数name';
+        obj.status = false;
+        res.send(obj);
+        res.end();
+        return false
+    }
+    if (!!!psd) {
+        obj.info = '缺失参数psd';
+        obj.status = false;
+        res.send(obj);
+        res.end();
+        return false
+    }
+    let addSqlParams = [name, psd];
+    connection.query(`INSERT INTO chat_people (name, psd) VALUES (?, ?)`, addSqlParams, function(error, results, fields) {
+        if (error) {
+            obj.info = error.message;
+            obj.status = false;
+            return false;
+        }
+        obj.info = 'sign success';
+        obj.status = true;
+        obj.result = results;
+        res.send(obj);
+        res.end();
+    });
+});
+
+// 登录
+app.post('/api/login', function(req, res) {
+    let name = req.body.name;
+    let psd = req.body.psd;
+    let obj = {
+        info: null,
+        status: true,
+        result: null
+    }
+    if (!!!name) {
+        obj.info = '缺失参数name';
+        obj.status = false;
+        res.send(obj);
+        res.end();
+        return false
+    }
+    if (!!!psd) {
+        obj.info = '缺失参数psd';
+        obj.status = false;
+        res.send(obj);
+        res.end();
+        return false
+    }
+    let addSqlParams = [name, psd];
+    connection.query(`INSERT INTO chat_people (name, psd) VALUES (?, ?)`, addSqlParams, function(error, results, fields) {
+        if (error) {
+            obj.info = error.message;
+            obj.status = false;
+            return false;
+        }
+        obj.info = 'login success';
         obj.status = true;
         obj.result = results;
         res.send(obj);
