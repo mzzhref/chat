@@ -8,7 +8,7 @@
             </li>
         </ul>
         <div class="send">
-            <input type="text" placeholder="来聊天哦" v-model="content">
+            <input type="text" placeholder="来聊天哦" v-model="content" @keyup.enter="send">
             <a href="javascript:;" @click="send">send</a>
         </div>
     </div>
@@ -73,6 +73,7 @@ export default {
                     setTimeout(function(){
                         vm.boxScroll(document.getElementById("chat"));
                     }, 1)
+                    vm.content = null;
                 }else{
                     alert(res.data.info)
                 }
