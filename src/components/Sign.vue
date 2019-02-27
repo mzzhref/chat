@@ -8,7 +8,7 @@
         <input type="password" v-model="psd" placeholder="密码">
         <br >
         <br >
-        <input type="password" v-model="psd_sure" placeholder="确认密码">
+        <input type="password" v-model="psd_sure" placeholder="确认密码" @keyup.enter="sign">
         <br >
         <br >
         <a href="javascript:;" @click="login">login</a>

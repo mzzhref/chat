@@ -5,7 +5,7 @@
         <input type="text" v-model="name" placeholder="用户名">
         <br >
         <br >
-        <input type="password" v-model="psd" placeholder="密码">
+        <input type="password" v-model="psd" placeholder="密码" @keyup.enter="login">
         <br >
         <br >
         <a href="javascript:;" @click="login">login</a>
