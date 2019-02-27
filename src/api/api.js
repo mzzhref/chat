@@ -1,5 +1,5 @@
 export const config = {};
-config.baseUrl = '//' + window.location.hostname + ':3000';
+config.baseUrl = '//' + window.location.host;
 config.api = {
     login: config.baseUrl + "/api/login",
     sign: config.baseUrl + "/api/sign",
