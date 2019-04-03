@@ -11,8 +11,8 @@
         <input type="password" v-model="psd_sure" placeholder="确认密码" @keyup.enter="sign">
         <br >
         <br >
-        <a href="javascript:;" @click="login">login</a>
-        <a href="javascript:;" @click="sign">sign</a>
+        <a href="javascript:;" @click="login">去登录</a>
+        <a href="javascript:;" @click="sign">注册</a>
     </div>
 </template>
 <script>

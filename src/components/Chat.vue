@@ -16,7 +16,7 @@
     </ul>
     <div class="send">
       <input type="text" placeholder="来聊天哦" v-model="content" @keyup.enter="send">
-      <a href="javascript:;" @click="send">send</a>
+      <a href="javascript:;" @click="send">发送</a>
     </div>
   </div>
 </template>
@@ -193,7 +193,7 @@ input {
   box-sizing: border-box;
   float: left;
   outline: none;
-  font-size: 30px;
+  font-size: 20px;
   resize: none;
   padding: 0 10px;
 }

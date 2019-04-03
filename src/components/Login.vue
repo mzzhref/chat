@@ -8,8 +8,8 @@
         <input type="password" v-model="psd" placeholder="密码" @keyup.enter="login">
         <br >
         <br >
-        <a href="javascript:;" @click="login">login</a>
-        <a href="javascript:;" @click="sign">sign</a>
+        <a href="javascript:;" @click="login">登录</a>
+        <a href="javascript:;" @click="sign">去注册</a>
     </div>
 </template>
 <script>
